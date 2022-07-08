@@ -36,12 +36,13 @@ fetch('http://localhost:8723/path/to/file?a=1&b=2', {
  */
 public class SimpleHttpServer {
     public static void main(String[] args) throws Exception {
-        var server = HttpServer.create(new InetSocketAddress(8723), 0);
+        var port = 8723;
+        var server = HttpServer.create(new InetSocketAddress(port), 0);
         server.createContext("/", new MyHandler());
         server.setExecutor(null);
         server.start();
         System.out.println("server start ok");
-        System.out.println("http://localhost:8723/");
+        System.out.println("http://localhost:" + port + "/");
     }
 
     public static class MyHandler implements HttpHandler {
@@ -54,14 +55,19 @@ public class SimpleHttpServer {
 
             // response
             var responseText = "http server ok";
+
+            // headers
             var responseHeaders = e.getResponseHeaders();
             responseHeaders.set("Access-Control-Allow-Origin", "*");
             responseHeaders.set("Access-Control-Allow-Headers", "*");
             responseHeaders.set("Cache-Control", "public, max-age=0");
             responseHeaders.set("Content-Type", "text/plain; charset=UTF-8");
-            responseHeaders.set("My-Server", "java.version/".concat(System.getProperty("java.version")));
+            responseHeaders.set("My-Server", "java.version/" + System.getProperty("java.version"));
 
+            // send headers
             e.sendResponseHeaders(200, responseText.length());
+
+            // send body
             var outputStream = e.getResponseBody();
             outputStream.write(responseText.getBytes());
             outputStream.close();
